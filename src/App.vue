@@ -1,24 +1,36 @@
 <template>
   <div id="app">
     <h1>This is a Vue 2.x Weather Provider</h1>
+
     <!-- <vue3-compo city="南京" :temperature="15" @msg="onMsg" /> -->
+
     <mod-container
-      src="/vue3-component/dist/vue3-weather-consumer.umd.js"
+      src="/vue3-weather-consumer.umd.js"
       city="北京"
       :temperature="5"
       @msg="onMsg"
     />
+    <mod-container
+      src="/vue2-weather-consumer.umd.js"
+      city="石家庄"
+      :temperature="3"
+      @msg="onMsg"
+    />
+    <mod-container src="/non-composition.umd.js" />
+    <local-sample city="蚌埠" :temperature="9" />
   </div>
 </template>
 
 <script>
 import ModContainer from "./components/ModContainer.vue";
+import LocalSample from "./components/LocalSample.js";
 // import Vue3Compo from "./vue3-weather-consumer.umd";
 
 export default {
   name: "App",
   components: {
     ModContainer,
+    LocalSample,
     // Vue3Compo,
   },
   methods: {

@@ -22,6 +22,9 @@ module.exports = {
     },
   },
   configureWebpack: {
+    // externals: {
+    //   "vue-demi": "VueDemi",
+    // },
     resolve: {
       alias: {
         "@systemjs": path.resolve(__dirname, "./node_modules/systemjs/dist"),

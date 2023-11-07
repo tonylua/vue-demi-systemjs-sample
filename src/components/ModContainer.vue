@@ -17,12 +17,18 @@ export default {
       mod: null,
     };
   },
+  created() {
+    // window.VueCompositionAPI = VueCompositionAPI;
+  },
   mounted() {
     setTimeout(async () => {
-      const comp = await loadComponent(this.src);
-      console.log("mod-container comp loaded", comp);
+      window.Vue = window.Vue2;
+      const res = await loadComponent(this.src);
+      const comp = res.default || res;
+      // this.mod = window.VueDemi.defineComponent(comp);
       this.mod = comp;
-    }, 1000);
+      console.log("mod-container comp loaded", comp, window.Vue.version);
+    }, 2000);
   },
 };
 </script>
