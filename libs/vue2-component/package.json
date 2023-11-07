@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build --target lib --name vue2-weather-consumer src/main-lib.js",
+    "build": "npm run build-only && cp dist/vue2-weather-consumer.umd.js ../../public && echo \"build & coped!\"",
+    "build-only": "vue-cli-service build --target lib --name vue2-weather-consumer src/main-lib.js",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {

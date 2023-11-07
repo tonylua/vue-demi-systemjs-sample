@@ -8,7 +8,7 @@
 
 <script>
 import HelloWorld from "./components/HelloWorld.vue";
-import WeatherConsumer from "./components/WeatherConsumer.js";
+import WeatherConsumer from "./components/WeatherConsumer.vue";
 
 export default {
   name: "App",

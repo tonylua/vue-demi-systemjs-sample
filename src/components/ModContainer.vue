@@ -1,6 +1,7 @@
 <template>
-  <div class="mod-container">
-    <component :is="mod" v-bind="$attrs" v-on="$listeners" />
+  <div class="mod-container" :class="{ loaded: !!mod }">
+    <component v-if="!!mod" :is="mod" v-bind="$attrs" v-on="$listeners" />
+    <span v-else>⏳ loading...</span>
   </div>
 </template>
 
@@ -33,4 +34,13 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.mod-container {
+  min-width: 50px;
+  min-height: 50px;
+  background-color: #ccc;
+}
+.mod-container.loaded {
+  background-color: transparent;
+}
+</style>

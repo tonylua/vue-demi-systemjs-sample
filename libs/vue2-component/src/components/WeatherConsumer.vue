@@ -1,3 +1,4 @@
+<script>
 // vue 2 component
 import { defineComponent, h, computed, isVue2 } from "vue-demi";
 
@@ -49,12 +50,16 @@ export default defineComponent({
       );
   },
   style: `
-    .consumer {
-      border: 1px solid var(--vue3-color, #336699);
-      border-radius: 10px;
-      width: 300px;
-      box-sizing: border-box;
-      padding: 20px;
-    }
   `,
 });
+</script>
+
+<style scoped>
+.consumer {
+  border: 1px solid var(--vue2-color, #000);
+  border-radius: 10px;
+  width: 300px;
+  box-sizing: border-box;
+  padding: 20px;
+}
+</style>

@@ -1,6 +1,14 @@
 // vue 3 component
 import { defineComponent, h, computed, isVue2 } from "vue-demi";
 
+const Sty = `
+    border: 1px solid var(--vue3-color, #336699);
+    border-radius: 10px;
+    width: 300px;
+    box-sizing: border-box;
+    padding: 20px;
+`;
+
 interface IProps {
   city: string;
   temperature?: number;
@@ -32,6 +40,7 @@ export default defineComponent({
         "div",
         {
           class: "consumer",
+          style: Sty,
           ...(isVue2
             ? {
                 on: {
@@ -55,13 +64,4 @@ export default defineComponent({
         ]
       );
   },
-  style: `
-    .consumer {
-      border: 1px solid var(--vue3-color, #336699);
-      border-radius: 10px;
-      width: 300px;
-      box-sizing: border-box;
-      padding: 20px;
-    }
-  `,
 });
