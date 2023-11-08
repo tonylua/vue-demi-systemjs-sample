@@ -1,6 +1,6 @@
 ![](./flow.png)
 
-demo:
+host app demo:
 
 - pnpm serve
 
