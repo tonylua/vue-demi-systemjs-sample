@@ -18,6 +18,13 @@
         :temperature="5"
         @msg="onMsg"
       />
+      <mod-container
+        src="/v2react-weather-consumer.umd.js"
+        :assets="['/v2react-weather-consumer.css']"
+        city="锡林格勒"
+        :temperature="-12"
+        @msg="onMsg"
+      />
     </div>
     <!-- <mod-container src="/non-composition.umd.js" /> -->
     <!-- <local-sample city="蚌埠" :temperature="9" @msg="onMsg" /> -->

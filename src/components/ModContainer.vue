@@ -6,12 +6,13 @@
 </template>
 
 <script>
-import { loadComponent } from "../utils/load";
+import { loadComponent, loadStyle } from "../utils/load";
 
 export default {
   name: "ModContainer",
   props: {
     src: String,
+    assets: Array,
   },
   data() {
     return {
@@ -29,7 +30,11 @@ export default {
       // this.mod = window.VueDemi.defineComponent(comp);
       this.mod = comp;
       console.log("mod-container comp loaded", comp, window.Vue.version);
-    }, 2000);
+    }, 2000); // TODO 就是为了等待基础依赖的加载，待优化
+
+    this.assets
+      ?.filter((asset) => /\.css$/.test(asset))
+      .forEach((asset) => loadStyle(asset));
   },
 };
 </script>

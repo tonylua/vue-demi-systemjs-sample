@@ -15,6 +15,15 @@ const deps = [
       console.log("v3", window.Vue3.version);
     },
   },
+  {
+    url: "/react@18.2.0.js",
+    onload: () => {
+      console.log("react", window.React.version);
+    },
+  },
+  {
+    url: "/react-dom@18.2.0.js",
+  },
   { url: "/@systemjs/system.min.js" },
   { url: "/@systemjs/extras/amd.min.js" },
   { url: "/@systemjs/extras/global.min.js" },
@@ -62,4 +71,12 @@ export const loadComponent = async (url) => {
     window.System._importMapAdded
   );
   return window.System.import(url);
+};
+
+export const loadStyle = (url) => {
+  const s = document.createElement("link");
+  s.rel = "stylesheet";
+  s.type = "text/css";
+  s.href = url;
+  document.head.appendChild(s);
 };
