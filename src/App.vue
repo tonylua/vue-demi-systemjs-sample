@@ -3,48 +3,60 @@
     <h1>Vue 2.x Host Page</h1>
     <h2>-- Weather Provider</h2>
 
-    <!-- <vue3-compo city="南京" :temperature="15" @msg="onMsg" /> -->
-
     <div class="mod-box">
       <mod-container
         src="/vue2-weather-consumer.umd.js"
-        city="石家庄"
+        :dependencies-ready="depsFinished"
         :temperature="3"
+        city="石家庄"
         @msg="onMsg"
       />
       <mod-container
+        pre-fetch
         src="/vue3-weather-consumer.umd.js"
-        city="北京"
+        :dependencies-ready="depsFinished"
         :temperature="5"
+        city="北京"
         @msg="onMsg"
       />
       <mod-container
         src="/v2react-weather-consumer.umd.js"
+        :dependencies-ready="depsFinished"
         :assets="['/v2react-weather-consumer.css']"
-        city="锡林格勒"
         :temperature="-12"
+        city="锡林格勒"
         @msg="onMsg"
       />
     </div>
-    <!-- <mod-container src="/non-composition.umd.js" /> -->
-    <!-- <local-sample city="蚌埠" :temperature="9" @msg="onMsg" /> -->
+    <span v-if="!depsFinished">loading deps...</span>
   </div>
 </template>
 
 <script>
+import { loadBaseDeps } from "./utils/load";
 import ModContainer from "./components/ModContainer.vue";
-// import LocalSample from "./components/LocalSample.js";
 
 export default {
   name: "App",
   components: {
     ModContainer,
-    // LocalSample,
+  },
+  data() {
+    return {
+      depsFinished: false,
+    };
   },
   methods: {
     onMsg(msg) {
       alert(msg);
     },
+  },
+  mounted() {
+    loadBaseDeps(0, (deps, index) => {
+      console.log(`${deps[index].url} loaded`);
+      const ok = index === deps.length - 1;
+      if (ok) this.depsFinished = ok;
+    });
   },
 };
 </script>

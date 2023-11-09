@@ -1,40 +1,76 @@
 <template>
-  <div class="mod-container" :class="{ loaded: !!mod }">
-    <component v-if="!!mod" :is="mod" v-bind="$attrs" v-on="$listeners" />
+  <div class="mod-container" :class="{ loaded: ready }">
+    <component v-if="ready" :is="mod" v-bind="$attrs" v-on="$listeners" />
     <span v-else>⏳ loading...</span>
   </div>
 </template>
 
 <script>
-import { loadComponent, loadStyle } from "../utils/load";
+import { loadComponent, loadStyle, loadPrefetch } from "../utils/load";
 
 export default {
   name: "ModContainer",
   props: {
-    src: String,
-    assets: Array,
+    src: {
+      type: String,
+      required: true,
+    },
+    assets: {
+      type: Array,
+      default: () => [],
+    },
+    dependenciesReady: {
+      type: Boolean,
+      default: false,
+    },
+    preFetch: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
+      preFetchedMod: null,
       mod: null,
     };
   },
-  created() {
-    // window.VueCompositionAPI = VueCompositionAPI;
+  computed: {
+    ready() {
+      return this.dependenciesReady && !!this.mod;
+    },
   },
-  mounted() {
-    setTimeout(async () => {
-      window.Vue = window.Vue2;
+  methods: {
+    async doFetch() {
       const res = await loadComponent(this.src);
-      const comp = res.default || res;
-      // this.mod = window.VueDemi.defineComponent(comp);
-      this.mod = comp;
-      console.log("mod-container comp loaded", comp, window.Vue.version);
-    }, 2000); // TODO 就是为了等待基础依赖的加载，待优化
+      return res.default || res;
+    },
+  },
+  async created() {
+    if (this.preFetch) {
+      loadPrefetch(this.src);
+    }
 
-    this.assets
-      ?.filter((asset) => /\.css$/.test(asset))
-      .forEach((asset) => loadStyle(asset));
+    this.$watch(
+      () => this.dependenciesReady,
+      async (ready) => {
+        if (!ready) return;
+
+        window.Vue = window.Vue2;
+
+        const res = await loadComponent(this.src);
+        const comp = res.default || res;
+        this.mod = comp;
+        console.log("mod-container component loaded", comp, window.Vue.version);
+
+        this.assets
+          ?.filter((asset) => /\.css$/.test(asset))
+          .forEach((asset) => {
+            loadStyle(asset);
+            console.log("mod-container asset loaded", asset);
+          });
+      },
+      { immediate: true }
+    );
   },
 };
 </script>

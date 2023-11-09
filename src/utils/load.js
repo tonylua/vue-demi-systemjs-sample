@@ -32,7 +32,7 @@ const deps = [
   { url: "/@systemjs/extras/use-default.min.js" },
 ];
 
-function loadDeps(index = 0) {
+export function loadBaseDeps(index = 0, callback = () => {}) {
   if (index >= deps.length) {
     console.log("All scripts loaded");
     return;
@@ -40,14 +40,12 @@ function loadDeps(index = 0) {
   const script = document.createElement("script");
   script.src = deps[index].url;
   script.onload = function () {
-    console.log(`${deps[index].url} loaded`);
     deps[index].onload?.();
-    loadDeps(index + 1); // Load the next script
+    callback(deps, index);
+    loadBaseDeps(index + 1, callback); // Load the next script
   };
   document.body.appendChild(script);
 }
-
-loadDeps();
 
 export const loadComponent = async (url) => {
   if (!window.System._importMapAdded) {
@@ -79,4 +77,13 @@ export const loadStyle = (url) => {
   s.type = "text/css";
   s.href = url;
   document.head.appendChild(s);
+};
+
+export const loadPrefetch = (url) => {
+  const s = document.createElement("link");
+  s.rel = "preload";
+  s.as = "script";
+  s.href = url;
+  document.head.appendChild(s);
+  console.log("prefetch", url);
 };
