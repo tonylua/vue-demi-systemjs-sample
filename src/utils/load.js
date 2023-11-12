@@ -1,6 +1,31 @@
 import * as VueDemi from "vue-demi";
+import ProxySandbox from "./sandbox/ProxySandbox";
+// import { stringLiteral, expressionStatement } from "@babel/types";
+import { code } from "@babel/template";
+import generator from "@babel/generator";
+const parser = require("@babel/parser");
+const traverse = require("@babel/traverse").default;
 
-const deps = [
+window.ProxySandbox = ProxySandbox;
+
+const resolvePromisesSeq = async (tasks) => {
+  const results = [];
+  for (const task of tasks) {
+    results.push(await task);
+  }
+  return results;
+};
+
+const systemJsDeps = [
+  { url: "/@systemjs/system.min.js" },
+  { url: "/@systemjs/extras/amd.min.js" },
+  { url: "/@systemjs/extras/global.min.js" },
+  { url: "/@systemjs/extras/module-types.min.js" },
+  { url: "/@systemjs/extras/named-register.min.js" },
+  { url: "/@systemjs/extras/use-default.min.js" },
+];
+
+const frameworkDeps = [
   {
     url: "/vue@2.6.14.js",
     onload: () => {
@@ -24,51 +49,144 @@ const deps = [
   {
     url: "/react-dom@18.2.0.js",
   },
-  { url: "/@systemjs/system.min.js" },
-  { url: "/@systemjs/extras/amd.min.js" },
-  { url: "/@systemjs/extras/global.min.js" },
-  { url: "/@systemjs/extras/module-types.min.js" },
-  { url: "/@systemjs/extras/named-register.min.js" },
-  { url: "/@systemjs/extras/use-default.min.js" },
+  // ...systemJsDeps,
 ];
 
-export function loadBaseDeps(index = 0, callback = () => {}) {
-  if (index >= deps.length) {
-    console.log("All scripts loaded");
-    return;
-  }
-  const script = document.createElement("script");
-  script.src = deps[index].url;
-  script.onload = function () {
-    deps[index].onload?.();
-    callback(deps, index);
-    loadBaseDeps(index + 1, callback); // Load the next script
-  };
-  document.body.appendChild(script);
+function _loadDep(dep) {
+  return new Promise((resolve, reject) => {
+    const { url, onload } = dep;
+    const script = document.createElement("script");
+    script.src = url;
+    script.onload = function () {
+      resolve(onload ? onload(dep) || dep : dep);
+    };
+    script.onerror = function (ex) {
+      reject(ex);
+    };
+    document.body.appendChild(script);
+  });
 }
 
-export const loadComponent = async (url) => {
-  if (!window.System._importMapAdded) {
-    const VueCompositionAPI = await import("@vue/composition-api");
-    window.VueCompositionAPI = VueCompositionAPI;
+export async function loadBaseDeps() {
+  const items = await resolvePromisesSeq(frameworkDeps.map(_loadDep));
+  console.log(items.length + " scripts loaded");
+  return items;
+}
 
-    window.System.set("app:Vue", window.Vue2);
-    window.System.set("app:VueDemi", VueDemi);
-    window.System.addImportMap({
-      imports: {
-        vue: "app:Vue",
-        "vue-demi": "app:VueDemi",
-      },
-    });
-    window.System._importMapAdded = true;
-  }
+export async function loadSystemjsDeps() {
+  await resolvePromisesSeq(systemJsDeps.map(_loadDep));
+  const VueCompositionAPI = await import("@vue/composition-api");
+  window.VueCompositionAPI = VueCompositionAPI;
+  window.System.set("app:Vue", window.Vue2);
+  window.System.set("app:VueDemi", VueDemi);
+  window.System.addImportMap({
+    imports: {
+      vue: "app:Vue",
+      "vue-demi": "app:VueDemi",
+    },
+  });
+  return window.System;
+}
+
+/**
+ * @typedef {Object} LoadComponentOptiosn
+ * @property {string} hostName - 宿主系统标识
+ * @property {boolean} sandbox - 是否沙箱隔离JS
+ */
+/**
+ * 加载组件
+ * @param {string} url
+ * @param {LoadComponentOptiosn} [options]
+ * @return {Promise<Object>}
+ */
+export const loadComponent = async (url, options) => {
+  // if (!window.System) throw new Error("no systemjs");
+
   console.log(
     "systemjs load: ",
+    options,
     url,
-    window.VueDemi,
-    window.System._importMapAdded
+    window.VueDemi
+    // window.System._importMapAdded
   );
-  return window.System.import(url);
+
+  options = {
+    hostName: "",
+    sandbox: true,
+    ...options,
+  };
+
+  let res;
+  // if (options.sandbox) {
+  //   const id = "sandbox_" + btoa(url);
+  //   const sandbox = new ProxySandbox(id);
+  //   res = (async function (window) {
+  //     sandbox.active();
+  //
+  //     window.__COMPONENT_HOST_NAME__ = options.hostName;
+  //     window.__COMPONENT_HOST_VUE_VERSION__ = VueDemi.isVue2
+  //       ? window.Vue2?.version || 2
+  //       : window.Vue3?.version || 3;
+  //     window.__CONTEXT_NAME__ = id;
+  //     window.__RAW_WINDOW__ = sandbox.globalContext;
+  //
+  //     const sysjs = await loadSystemjsDeps();
+  //     global.VueDemi = window.VueDemi;
+  //     console.log(
+  //       window,
+  //       window.VueDemi,
+  //       self,
+  //       self.VueDemi,
+  //       global,
+  //       window.__RAW_WINDOW__
+  //     );
+  //     return sysjs.import(url);
+  //     // let modCont = await fetch(url).then((r) => r.text());
+  //     // // modCont.replace(/self\./, "window.");
+  //     // // console.log(url, modCont);
+  //     // return module2Component(modCont);
+  //     // const umdFn = eval(modCont);
+  //     // console.log(typeof umdFn, 1111);
+  //     // const mod = umdFn();
+  //     // return Promise.resolve(mod);
+  //   })(sandbox.proxy);
+  // } else {
+  await loadSystemjsDeps();
+  // res = window.System.import(url);
+  // }
+  let modCont = await fetch(url).then((r) => r.text());
+
+  const ast = parser.parse(modCont, {
+    sourceType: "script",
+  });
+  let functionCounter = 0;
+  traverse(ast, {
+    enter(path) {
+      if (path.node.type === "FunctionExpression") {
+        functionCounter++;
+        if (functionCounter === 2) {
+          const { start, end } = path.node;
+          let source = modCont.slice(start, end);
+          source = source.replace(/{/, "{console.log('abc');");
+          source = source.replace(/}$/, "console.log('123');}");
+          path.replaceWithSourceString(source);
+        }
+      }
+    },
+  });
+  modCont = generator(ast, {}, code).code;
+  // console.log(modCont, 3333);
+  res = module2Component(modCont);
+
+  return res;
+};
+
+export const module2Component = async (moduleContent) => {
+  const dataUrl = `data:text/javascript;charset=utf-8;base64,${btoa(
+    unescape(encodeURIComponent(moduleContent))
+  )}`;
+  const res = await window.System.import(dataUrl);
+  return res.default || res;
 };
 
 export const loadStyle = (url) => {

@@ -13,6 +13,11 @@ const ComponentContainer = styled.div`
 `;
 
 export default function WeatherConsumer(props) {
+  // @ts-ignore
+  window.globalVar1 = "reactGlobalVar1";
+  // @ts-ignore
+  window.__RAW_WINDOW__?.console.log("react fc", window.globalVar1);
+
   const { city, temperature, onMsg } = props;
 
   const compRef = useRef(null);

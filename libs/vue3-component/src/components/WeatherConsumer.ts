@@ -30,6 +30,11 @@ export default defineComponent({
     const centigrade = computed(() => `${props.temperature || "--"}℃`);
     const vueVer = isVue2 ? 2 : 3;
 
+    // @ts-ignore
+    window.globalVar1 = "vue3GlobalVar1";
+    // @ts-ignore
+    window.__RAW_WINDOW__?.console.log("setup3", vueVer, window.globalVar1);
+
     const onClick = () => {
       console.log("onClick", props.city);
       emit("msg", props.city);

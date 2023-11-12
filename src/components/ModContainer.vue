@@ -19,6 +19,10 @@ export default {
       type: Array,
       default: () => [],
     },
+    hostName: {
+      type: String,
+      default: "",
+    },
     dependenciesReady: {
       type: Boolean,
       default: false,
@@ -41,7 +45,9 @@ export default {
   },
   methods: {
     async doFetch() {
-      const res = await loadComponent(this.src);
+      const res = await loadComponent(this.src, {
+        hostName: this.hostName,
+      });
       return res.default || res;
     },
   },
@@ -58,6 +64,10 @@ export default {
         window.Vue = window.Vue2;
 
         const res = await loadComponent(this.src);
+        if (!res) {
+          console.log(res);
+          return;
+        }
         const comp = res.default || res;
         this.mod = comp;
         console.log("mod-container component loaded", comp, window.Vue.version);

@@ -1,5 +1,5 @@
-import { defineComponent as s, computed as u, h as o, isVue2 as n } from "vue-demi";
-const l = `
+import { defineComponent as s, computed as u, h as o, isVue2 as i } from "vue-demi";
+const a = `
     border: 1px solid var(--vue3-color, #336699);
     border-radius: 10px;
     width: 300px;
@@ -13,21 +13,24 @@ const l = `
     },
     temperature: Number
   },
-  setup(e, { emit: r }) {
-    const c = u(() => `${e.temperature || "--"}℃`), i = n ? 2 : 3, t = () => {
-      console.log("onClick", e.city), r("msg", e.city);
+  setup(e, { emit: l }) {
+    var t;
+    const c = u(() => `${e.temperature || "--"}℃`), n = i ? 2 : 3;
+    window.globalVar1 = "vue3GlobalVar1", (t = window.__RAW_WINDOW__) == null || t.console.log("setup3", n, window.globalVar1);
+    const r = () => {
+      console.log("onClick", e.city), l("msg", e.city);
     };
     return () => o(
       "div",
       {
         class: "consumer",
-        style: l,
-        ...n ? {
+        style: a,
+        ...i ? {
           on: {
-            click: t
+            click: r
           }
         } : {
-          onClick: t
+          onClick: r
         }
       },
       [
@@ -39,7 +42,7 @@ const l = `
         }),
         `${e.city}: ${c.value}`,
         o("hr"),
-        `i am running in Vue${i}`
+        `i am running in Vue${n}`
       ]
     );
   }

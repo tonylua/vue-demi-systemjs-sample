@@ -5,28 +5,31 @@
 
     <div class="mod-box">
       <mod-container
+        host-name="app1"
         src="/vue2-weather-consumer.umd.js"
         :dependencies-ready="depsFinished"
         :temperature="3"
         city="石家庄"
         @msg="onMsg"
       />
-      <mod-container
-        pre-fetch
-        src="/vue3-weather-consumer.umd.js"
-        :dependencies-ready="depsFinished"
-        :temperature="5"
-        city="北京"
-        @msg="onMsg"
-      />
-      <mod-container
-        src="/v2react-weather-consumer.umd.js"
-        :dependencies-ready="depsFinished"
-        :assets="['/v2react-weather-consumer.css']"
-        :temperature="-12"
-        city="锡林格勒"
-        @msg="onMsg"
-      />
+      <!-- <mod-container -->
+      <!--   :pre-fetch="false" -->
+      <!--   host-name="app1" -->
+      <!--   src="/vue3-weather-consumer.umd.js" -->
+      <!--   :dependencies-ready="depsFinished" -->
+      <!--   :temperature="5" -->
+      <!--   city="北京" -->
+      <!--   @msg="onMsg" -->
+      <!-- /> -->
+      <!-- <mod-container -->
+      <!--   host-name="app1" -->
+      <!--   src="/v2react-weather-consumer.umd.js" -->
+      <!--   :dependencies-ready="depsFinished" -->
+      <!--   :assets="['/v2react-weather-consumer.css']" -->
+      <!--   :temperature="-12" -->
+      <!--   city="锡林格勒" -->
+      <!--   @msg="onMsg" -->
+      <!-- /> -->
     </div>
     <span v-if="!depsFinished">loading deps...</span>
   </div>
@@ -52,10 +55,9 @@ export default {
     },
   },
   mounted() {
-    loadBaseDeps(0, (deps, index) => {
-      console.log(`${deps[index].url} loaded`);
-      const ok = index === deps.length - 1;
-      if (ok) this.depsFinished = ok;
+    loadBaseDeps().then((deps) => {
+      console.log(deps.map((dep) => `${dep.url} loaded`).join("\n"));
+      this.depsFinished = true;
     });
   },
 };

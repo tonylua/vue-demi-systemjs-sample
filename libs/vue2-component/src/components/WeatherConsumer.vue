@@ -13,7 +13,9 @@ export default defineComponent({
   setup(props, { emit }) {
     const vueVer = isVue2 ? 2 : 3;
 
-    console.log("setup", vueVer);
+    window.globalVar1 = "vue2GlobalVar1";
+    window.__RAW_WINDOW__?.console.log("setup2", vueVer, window.globalVar1);
+    console.log(window, window.__COMPONENT_HOST_VUE_VERSION__);
 
     const centigrade = computed(() => `${props.temperature || "--"}℃`);
     const onClick = () => {
@@ -49,8 +51,6 @@ export default defineComponent({
         ]
       );
   },
-  style: `
-  `,
 });
 </script>
 
