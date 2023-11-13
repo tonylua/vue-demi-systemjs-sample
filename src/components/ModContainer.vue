@@ -1,12 +1,20 @@
 <template>
   <div class="mod-container" :class="{ loaded: ready }">
-    <component v-if="ready" :is="mod" v-bind="$attrs" v-on="$listeners" />
-    <span v-else>⏳ loading...</span>
+    <div class="mod-wrapper" ref="m">
+      <component v-if="ready" :is="mod" v-bind="$attrs" v-on="$listeners" />
+      <span v-else>⏳ loading...</span>
+    </div>
+    <div class="shadow-wrapper" ref="s"></div>
   </div>
 </template>
 
 <script>
-import { loadComponent, loadStyle, loadPrefetch } from "../utils/load";
+import {
+  loadComponent,
+  loadStyle,
+  loadPrefetch,
+  copyScopedStyle,
+} from "../utils/load";
 
 export default {
   name: "ModContainer",
@@ -55,6 +63,23 @@ export default {
     if (this.preFetch) {
       loadPrefetch(this.src);
     }
+  },
+  mounted() {
+    let modWrapper = this.$refs.m;
+    let shadowWrapper = this.$refs.s;
+    let shadow = shadowWrapper.attachShadow({ mode: "open" });
+
+    this.assets
+      ?.filter((asset) => /\.css$/.test(asset))
+      .forEach((asset) => {
+        loadStyle(asset, shadow);
+        console.log("mod-container asset loaded", asset);
+      });
+    shadow.appendChild(modWrapper);
+
+    // shadow = null;
+    shadowWrapper = null;
+    // modWrapper = null;
 
     this.$watch(
       () => this.dependenciesReady,
@@ -65,19 +90,16 @@ export default {
 
         const res = await loadComponent(this.src);
         if (!res) {
-          console.log(res);
+          console.error("load failure", this.src);
           return;
         }
         const comp = res.default || res;
         this.mod = comp;
         console.log("mod-container component loaded", comp, window.Vue.version);
 
-        this.assets
-          ?.filter((asset) => /\.css$/.test(asset))
-          .forEach((asset) => {
-            loadStyle(asset);
-            console.log("mod-container asset loaded", asset);
-          });
+        this.$nextTick(() => {
+          copyScopedStyle(shadow, modWrapper);
+        });
       },
       { immediate: true }
     );

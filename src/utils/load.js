@@ -125,12 +125,38 @@ export const module2Component = async (moduleContent) => {
   return res.default || res;
 };
 
-export const loadStyle = (url) => {
+export const loadStyle = (url, target = document.head) => {
   const s = document.createElement("link");
   s.rel = "stylesheet";
   s.type = "text/css";
   s.href = url;
-  document.head.appendChild(s);
+  target.appendChild(s);
+};
+
+const findDatasetAttrs = (dom) =>
+  Array.from(dom.attributes)
+    .filter((attr) => /^data-/.test(attr.name))
+    .map((tag) => tag.name);
+
+export const copyScopedStyle = (shadow, wrapperDom) => {
+  const attrs0 = findDatasetAttrs(wrapperDom);
+  const attrs1 = findDatasetAttrs(wrapperDom.firstElementChild).filter(
+    (attr) => !attrs0.includes(attr)
+  );
+  const tags = Array.prototype.filter
+    .call(document.head.children, (tag) => /^style$/i.test(tag.tagName))
+    .filter((tag) => {
+      console.log(
+        attrs1,
+        tag.textContent,
+        attrs1.some((attr) => tag.textContent.includes(attr))
+      );
+      return (
+        attrs1.length && attrs1.some((attr) => tag.textContent.includes(attr))
+      );
+    })
+    .map((tag) => tag.cloneNode(true));
+  tags.forEach((tag) => shadow.appendChild(tag));
 };
 
 export const loadPrefetch = (url) => {

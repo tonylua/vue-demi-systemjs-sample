@@ -1,4 +1,5 @@
 module.exports = {
+  productionSourceMap: false,
   configureWebpack: {
     ...(process.env.NODE_ENV === "production"
       ? {
