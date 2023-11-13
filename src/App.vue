@@ -22,12 +22,13 @@
         @msg="onMsg"
       />
       <mod-container
+        css-scoped
         host-name="app1"
         src="/v2react-weather-consumer.umd.js"
         :dependencies-ready="depsFinished"
         :assets="['/v2react-weather-consumer.css']"
         :temperature="-12"
-        city="锡林格勒"
+        city="锡林郭勒"
         @msg="onMsg"
       />
     </div>
@@ -80,5 +81,8 @@ export default {
   display: flex;
   flex-direction: row;
   gap: 10px;
+}
+.mod-box > div {
+  flex-basis: 33%;
 }
 </style>

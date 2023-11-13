@@ -31,6 +31,10 @@ export default {
       type: String,
       default: "",
     },
+    cssScoped: {
+      type: Boolean,
+      default: true,
+    },
     dependenciesReady: {
       type: Boolean,
       default: false,
@@ -72,10 +76,11 @@ export default {
     this.assets
       ?.filter((asset) => /\.css$/.test(asset))
       .forEach((asset) => {
-        loadStyle(asset, shadow);
+        loadStyle(asset, this.cssScoped ? shadow : void 0);
         console.log("mod-container asset loaded", asset);
       });
-    shadow.appendChild(modWrapper);
+
+    if (this.cssScoped) shadow.appendChild(modWrapper);
 
     // shadow = null;
     shadowWrapper = null;
@@ -98,7 +103,7 @@ export default {
         console.log("mod-container component loaded", comp, window.Vue.version);
 
         this.$nextTick(() => {
-          copyScopedStyle(shadow, modWrapper);
+          if (this.cssScoped) copyScopedStyle(shadow, modWrapper);
         });
       },
       { immediate: true }
@@ -115,5 +120,11 @@ export default {
 }
 .mod-container.loaded {
   background-color: transparent;
+}
+.mod-container,
+.mod-wrapper,
+.shadow-wrapper {
+  display: inline-block;
+  width: auto;
 }
 </style>

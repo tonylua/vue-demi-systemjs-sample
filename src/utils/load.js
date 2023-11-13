@@ -145,18 +145,16 @@ export const copyScopedStyle = (shadow, wrapperDom) => {
   );
   const tags = Array.prototype.filter
     .call(document.head.children, (tag) => /^style$/i.test(tag.tagName))
-    .filter((tag) => {
-      console.log(
-        attrs1,
-        tag.textContent,
-        attrs1.some((attr) => tag.textContent.includes(attr))
-      );
-      return (
+    .filter(
+      (tag) =>
         attrs1.length && attrs1.some((attr) => tag.textContent.includes(attr))
-      );
-    })
-    .map((tag) => tag.cloneNode(true));
-  tags.forEach((tag) => shadow.appendChild(tag));
+    );
+  tags
+    .map((tag) => tag.cloneNode(true))
+    .forEach((tag) => shadow.appendChild(tag));
+  tags.forEach((tag) => tag.parentNode.removeChild(tag));
+
+  // TODO styled-component 动态演算的样式无法拷贝
 };
 
 export const loadPrefetch = (url) => {
