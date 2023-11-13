@@ -14,8 +14,14 @@ export default defineComponent({
     const vueVer = isVue2 ? 2 : 3;
 
     window.globalVar1 = "vue2GlobalVar1";
-    window.__RAW_WINDOW__?.console.log("setup2", vueVer, window.globalVar1);
-    console.log(window, window.__COMPONENT_HOST_VUE_VERSION__);
+    console.log(
+      "⌨️ setup 2",
+      vueVer,
+      window,
+      window.__RAW_WINDOW__,
+      window.globalVar1,
+      window.__COMPONENT_HOST_VUE_VERSION__
+    );
 
     const centigrade = computed(() => `${props.temperature || "--"}℃`);
     const onClick = () => {

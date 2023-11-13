@@ -28,6 +28,7 @@ export default defineConfig({
     })(),
   ],
   build: {
+    outDir: resolve(__dirname, "./dist/vue2/"),
     lib: {
       entry: resolve(__dirname, "./vue-wrapper/v2.js"),
       name: "v2react-weather-consumer",

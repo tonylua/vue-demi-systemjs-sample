@@ -1,11 +1,11 @@
-import { defineComponent as s, computed as u, h as o, isVue2 as i } from "vue-demi";
-const a = `
+import { defineComponent as c, computed as s, h as o, isVue2 as t } from "vue-demi";
+const u = `
     border: 1px solid var(--vue3-color, #336699);
     border-radius: 10px;
     width: 300px;
     box-sizing: border-box;
     padding: 20px;
-`, d = s({
+`, a = c({
   props: {
     city: {
       type: String,
@@ -13,19 +13,27 @@ const a = `
     },
     temperature: Number
   },
-  setup(e, { emit: l }) {
-    var t;
-    const c = u(() => `${e.temperature || "--"}℃`), n = i ? 2 : 3;
-    window.globalVar1 = "vue3GlobalVar1", (t = window.__RAW_WINDOW__) == null || t.console.log("setup3", n, window.globalVar1);
+  setup(e, { emit: i }) {
+    const l = s(() => `${e.temperature || "--"}℃`), n = t ? 2 : 3;
+    window.globalVar1 = "vue3GlobalVar1", console.log(
+      "🇵🇸 setup 3",
+      n,
+      // @ts-ignore
+      window.globalVar1,
+      // @ts-ignore
+      window.__CONTEXT_NAME__,
+      // @ts-ignore
+      window.__COMPONENT_HOST_VUE_VERSION__
+    );
     const r = () => {
-      console.log("onClick", e.city), l("msg", e.city);
+      console.log("onClick", e.city), i("msg", e.city);
     };
     return () => o(
       "div",
       {
         class: "consumer",
-        style: a,
-        ...i ? {
+        style: u,
+        ...t ? {
           on: {
             click: r
           }
@@ -40,7 +48,7 @@ const a = `
             innerHTML: "&lt;vue3-weather-consumer/&gt;"
           }
         }),
-        `${e.city}: ${c.value}`,
+        `${e.city}: ${l.value}`,
         o("hr"),
         `i am running in Vue${n}`
       ]
@@ -49,7 +57,7 @@ const a = `
 });
 console.log(
   "v3c",
-  d
+  a
   // Vue.version,
   // Vue === window.Vue,
   // Vue === window.Vue3,
@@ -59,5 +67,5 @@ console.log(
   // VueDemi === window.VueDemi
 );
 export {
-  d as default
+  a as default
 };

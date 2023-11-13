@@ -12,24 +12,24 @@
         city="石家庄"
         @msg="onMsg"
       />
-      <!-- <mod-container -->
-      <!--   :pre-fetch="false" -->
-      <!--   host-name="app1" -->
-      <!--   src="/vue3-weather-consumer.umd.js" -->
-      <!--   :dependencies-ready="depsFinished" -->
-      <!--   :temperature="5" -->
-      <!--   city="北京" -->
-      <!--   @msg="onMsg" -->
-      <!-- /> -->
-      <!-- <mod-container -->
-      <!--   host-name="app1" -->
-      <!--   src="/v2react-weather-consumer.umd.js" -->
-      <!--   :dependencies-ready="depsFinished" -->
-      <!--   :assets="['/v2react-weather-consumer.css']" -->
-      <!--   :temperature="-12" -->
-      <!--   city="锡林格勒" -->
-      <!--   @msg="onMsg" -->
-      <!-- /> -->
+      <mod-container
+        pre-fetch
+        host-name="app1"
+        src="/vue3-weather-consumer.umd.js"
+        :dependencies-ready="depsFinished"
+        :temperature="5"
+        city="北京"
+        @msg="onMsg"
+      />
+      <mod-container
+        host-name="app1"
+        src="/v2react-weather-consumer.umd.js"
+        :dependencies-ready="depsFinished"
+        :assets="['/v2react-weather-consumer.css']"
+        :temperature="-12"
+        city="锡林格勒"
+        @msg="onMsg"
+      />
     </div>
     <span v-if="!depsFinished">loading deps...</span>
   </div>

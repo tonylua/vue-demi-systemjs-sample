@@ -14,9 +14,14 @@ const ComponentContainer = styled.div`
 
 export default function WeatherConsumer(props) {
   // @ts-ignore
-  window.globalVar1 = "reactGlobalVar1";
+  window.globalVar1 = "reactGlobalVar123";
   // @ts-ignore
-  window.__RAW_WINDOW__?.console.log("react fc", window.globalVar1);
+  console.log(
+    "⚛️ react fc",
+    window.globalVar1,
+    window.__CONTEXT_NAME__,
+    window.__COMPONENT_HOST_VUE_VERSION__
+  );
 
   const { city, temperature, onMsg } = props;
 
@@ -37,8 +42,8 @@ export default function WeatherConsumer(props) {
       <h1 part="title" style={{ color: "#ddd" }}>
         &lt;react-weather-consumer/&gt;
       </h1>
-      <Icon name="skin" size={30} />
       {city}: <Tag color="volcano">{centigrade}</Tag>
+      <Icon name="skin" size={30} />
     </ComponentContainer>
   );
 }

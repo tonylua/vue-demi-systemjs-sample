@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "run-p type-check build-only copy-to-demo",
+    "build": "run-p type-check build-only && npm run copy-to-demo",
     "preview": "vite preview",
     "copy-to-demo": "cp dist/vue3-weather-consumer.umd.js ../../public/",
     "build-only": "vite build",

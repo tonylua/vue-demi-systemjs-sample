@@ -1,12 +1,5 @@
 import * as VueDemi from "vue-demi";
-import ProxySandbox from "./sandbox/ProxySandbox";
-// import { stringLiteral, expressionStatement } from "@babel/types";
-import { code } from "@babel/template";
-import generator from "@babel/generator";
-const parser = require("@babel/parser");
-const traverse = require("@babel/traverse").default;
-
-window.ProxySandbox = ProxySandbox;
+import { wrapModuleWithSandbox } from "./content";
 
 const resolvePromisesSeq = async (tasks) => {
   const results = [];
@@ -100,15 +93,7 @@ export async function loadSystemjsDeps() {
  * @return {Promise<Object>}
  */
 export const loadComponent = async (url, options) => {
-  // if (!window.System) throw new Error("no systemjs");
-
-  console.log(
-    "systemjs load: ",
-    options,
-    url,
-    window.VueDemi
-    // window.System._importMapAdded
-  );
+  console.log("systemjs load: ", options, url, window.VueDemi);
 
   options = {
     hostName: "",
@@ -116,67 +101,18 @@ export const loadComponent = async (url, options) => {
     ...options,
   };
 
-  let res;
-  // if (options.sandbox) {
-  //   const id = "sandbox_" + btoa(url);
-  //   const sandbox = new ProxySandbox(id);
-  //   res = (async function (window) {
-  //     sandbox.active();
-  //
-  //     window.__COMPONENT_HOST_NAME__ = options.hostName;
-  //     window.__COMPONENT_HOST_VUE_VERSION__ = VueDemi.isVue2
-  //       ? window.Vue2?.version || 2
-  //       : window.Vue3?.version || 3;
-  //     window.__CONTEXT_NAME__ = id;
-  //     window.__RAW_WINDOW__ = sandbox.globalContext;
-  //
-  //     const sysjs = await loadSystemjsDeps();
-  //     global.VueDemi = window.VueDemi;
-  //     console.log(
-  //       window,
-  //       window.VueDemi,
-  //       self,
-  //       self.VueDemi,
-  //       global,
-  //       window.__RAW_WINDOW__
-  //     );
-  //     return sysjs.import(url);
-  //     // let modCont = await fetch(url).then((r) => r.text());
-  //     // // modCont.replace(/self\./, "window.");
-  //     // // console.log(url, modCont);
-  //     // return module2Component(modCont);
-  //     // const umdFn = eval(modCont);
-  //     // console.log(typeof umdFn, 1111);
-  //     // const mod = umdFn();
-  //     // return Promise.resolve(mod);
-  //   })(sandbox.proxy);
-  // } else {
   await loadSystemjsDeps();
-  // res = window.System.import(url);
-  // }
-  let modCont = await fetch(url).then((r) => r.text());
 
-  const ast = parser.parse(modCont, {
-    sourceType: "script",
+  let modCont = await fetch(url).then((r) => r.text());
+  const sandboxId = "sandbox_" + btoa(url);
+  modCont = wrapModuleWithSandbox(sandboxId, modCont, {
+    __CONTEXT_NAME__: sandboxId,
+    __COMPONENT_HOST_NAME__: options.hostName,
+    __COMPONENT_HOST_VUE_VERSION__: VueDemi.isVue2
+      ? window.Vue2?.version || 2
+      : window.Vue3?.version || 3,
   });
-  let functionCounter = 0;
-  traverse(ast, {
-    enter(path) {
-      if (path.node.type === "FunctionExpression") {
-        functionCounter++;
-        if (functionCounter === 2) {
-          const { start, end } = path.node;
-          let source = modCont.slice(start, end);
-          source = source.replace(/{/, "{console.log('abc');");
-          source = source.replace(/}$/, "console.log('123');}");
-          path.replaceWithSourceString(source);
-        }
-      }
-    },
-  });
-  modCont = generator(ast, {}, code).code;
-  // console.log(modCont, 3333);
-  res = module2Component(modCont);
+  const res = module2Component(modCont);
 
   return res;
 };

@@ -28,7 +28,7 @@
   "scripts": {
     "start": "craco start",
     "build:react": "craco build --config craco.config.js",
-    "copy-to-demo": "cp dist/*weather-consumer.{css,umd.js} ../../public/",
+    "copy-to-demo": "cp dist/{vue2,vue3}/*react-weather-consumer.{css,umd.js} ../../public/",
     "to:vue2": "node ./switch-vue-version.js to=2",
     "to:vue3": "node ./switch-vue-version.js to=3",
     "build:vue2": "npm run to:vue2 && vite build --config vue2.vite.config.ts",

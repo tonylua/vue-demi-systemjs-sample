@@ -32,8 +32,16 @@ export default defineComponent({
 
     // @ts-ignore
     window.globalVar1 = "vue3GlobalVar1";
-    // @ts-ignore
-    window.__RAW_WINDOW__?.console.log("setup3", vueVer, window.globalVar1);
+    console.log(
+      "🇵🇸 setup 3",
+      vueVer,
+      // @ts-ignore
+      window.globalVar1,
+      // @ts-ignore
+      window.__CONTEXT_NAME__,
+      // @ts-ignore
+      window.__COMPONENT_HOST_VUE_VERSION__
+    );
 
     const onClick = () => {
       console.log("onClick", props.city);
