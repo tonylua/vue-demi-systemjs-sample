@@ -138,23 +138,39 @@ const findDatasetAttrs = (dom) =>
     .filter((attr) => /^data-/.test(attr.name))
     .map((tag) => tag.name);
 
-export const copyScopedStyle = (shadow, wrapperDom) => {
-  const attrs0 = findDatasetAttrs(wrapperDom);
-  const attrs1 = findDatasetAttrs(wrapperDom.firstElementChild).filter(
-    (attr) => !attrs0.includes(attr)
+const moveScopedStyle = (shadowWrapper, moduleWrapper) => {
+  const wrapperAttrs = findDatasetAttrs(moduleWrapper);
+  const moduleArrts = findDatasetAttrs(moduleWrapper.firstElementChild).filter(
+    (attr) => !wrapperAttrs.includes(attr)
   );
   const tags = Array.prototype.filter
     .call(document.head.children, (tag) => /^style$/i.test(tag.tagName))
     .filter(
       (tag) =>
-        attrs1.length && attrs1.some((attr) => tag.textContent.includes(attr))
+        moduleArrts.length &&
+        moduleArrts.some((attr) => tag.textContent.includes(attr))
     );
   tags
     .map((tag) => tag.cloneNode(true))
-    .forEach((tag) => shadow.appendChild(tag));
+    .forEach((tag) => shadowWrapper.appendChild(tag));
   tags.forEach((tag) => tag.parentNode.removeChild(tag));
 
   // TODO styled-component 动态演算的样式无法拷贝
+};
+
+export const handleScopedStyle = (
+  shadowWrapper,
+  moduleWrapper,
+  isPrepare = false
+) => {
+  const shadow =
+    shadowWrapper.shadowRoot || shadowWrapper.attachShadow({ mode: "open" });
+  if (isPrepare) {
+    shadow.appendChild(moduleWrapper);
+  } else {
+    moveScopedStyle(shadow, moduleWrapper);
+  }
+  return shadow;
 };
 
 export const loadPrefetch = (url) => {

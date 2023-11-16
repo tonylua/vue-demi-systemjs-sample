@@ -13,7 +13,7 @@ import {
   loadComponent,
   loadStyle,
   loadPrefetch,
-  copyScopedStyle,
+  handleScopedStyle,
 } from "../utils/load";
 
 export default {
@@ -71,20 +71,17 @@ export default {
   mounted() {
     let modWrapper = this.$refs.m;
     let shadowWrapper = this.$refs.s;
-    let shadow = shadowWrapper.attachShadow({ mode: "open" });
+
+    let shadow = this.cssScoped
+      ? handleScopedStyle(shadowWrapper, modWrapper, true)
+      : void 0;
 
     this.assets
       ?.filter((asset) => /\.css$/.test(asset))
       .forEach((asset) => {
-        loadStyle(asset, this.cssScoped ? shadow : void 0);
+        loadStyle(asset, shadow);
         console.log("mod-container asset loaded", asset);
       });
-
-    if (this.cssScoped) shadow.appendChild(modWrapper);
-
-    // shadow = null;
-    shadowWrapper = null;
-    // modWrapper = null;
 
     this.$watch(
       () => this.dependenciesReady,
@@ -102,9 +99,11 @@ export default {
         this.mod = comp;
         console.log("mod-container component loaded", comp, window.Vue.version);
 
-        this.$nextTick(() => {
-          if (this.cssScoped) copyScopedStyle(shadow, modWrapper);
-        });
+        if (this.cssScoped) {
+          this.$nextTick(() => {
+            shadow = handleScopedStyle(shadowWrapper, modWrapper);
+          });
+        }
       },
       { immediate: true }
     );
