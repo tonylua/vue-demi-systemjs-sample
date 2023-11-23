@@ -9,12 +9,8 @@
 </template>
 
 <script>
-import {
-  loadComponent,
-  loadStyle,
-  loadPrefetch,
-  handleScopedStyle,
-} from "../utils/load";
+import { loadComponent, loadStyle, loadPrefetch } from "../utils/load";
+import { handleScopedStyle } from "../utils/scoped-style";
 
 export default {
   name: "ModContainer",
@@ -42,6 +38,10 @@ export default {
     preFetch: {
       type: Boolean,
       default: false,
+    },
+    classnameWhitelist: {
+      type: Array,
+      default: () => [],
     },
   },
   data() {
@@ -73,7 +73,9 @@ export default {
     let shadowWrapper = this.$refs.s;
 
     let shadow = this.cssScoped
-      ? handleScopedStyle(shadowWrapper, modWrapper, true)
+      ? handleScopedStyle(shadowWrapper, modWrapper, {
+          isPrepare: true,
+        })
       : void 0;
 
     this.assets
@@ -100,8 +102,14 @@ export default {
         console.log("mod-container component loaded", comp, window.Vue.version);
 
         if (this.cssScoped) {
+          // TODO 此处时机待查
           this.$nextTick(() => {
-            shadow = handleScopedStyle(shadowWrapper, modWrapper);
+            // setTimeout(() => {
+            shadow = handleScopedStyle(shadowWrapper, modWrapper, {
+              whitelist: this.classnameWhitelist,
+              includeAncestorScopedWhitelist: true,
+            });
+            // }, 0);
           });
         }
       },

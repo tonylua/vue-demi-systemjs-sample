@@ -11,6 +11,7 @@
         :temperature="3"
         city="石家庄"
         @msg="onMsg"
+        :classname-whitelist="['custom-style']"
       />
       <mod-container
         pre-fetch
@@ -84,5 +85,15 @@ export default {
 }
 .mod-box > div {
   flex-basis: 33%;
+}
+
+.custom-style {
+  color: pink;
+}
+</style>
+
+<style scoped>
+.custom-style {
+  color: green;
 }
 </style>

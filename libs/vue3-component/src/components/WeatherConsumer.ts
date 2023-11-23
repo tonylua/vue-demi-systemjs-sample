@@ -73,7 +73,13 @@ export default defineComponent({
           }),
           `${props.city}: ${centigrade.value}`,
           h("hr"),
-          `i am running in Vue${vueVer}`,
+          h(
+            "div",
+            {
+              class: "custom-style",
+            },
+            `i am running in Vue${vueVer}`
+          ),
         ]
       );
   },

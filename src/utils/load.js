@@ -133,46 +133,6 @@ export const loadStyle = (url, target = document.head) => {
   target.appendChild(s);
 };
 
-const findDatasetAttrs = (dom) =>
-  Array.from(dom.attributes)
-    .filter((attr) => /^data-/.test(attr.name))
-    .map((tag) => tag.name);
-
-const moveScopedStyle = (shadowWrapper, moduleWrapper) => {
-  const wrapperAttrs = findDatasetAttrs(moduleWrapper);
-  const moduleArrts = findDatasetAttrs(moduleWrapper.firstElementChild).filter(
-    (attr) => !wrapperAttrs.includes(attr)
-  );
-  const tags = Array.prototype.filter
-    .call(document.head.children, (tag) => /^style$/i.test(tag.tagName))
-    .filter(
-      (tag) =>
-        moduleArrts.length &&
-        moduleArrts.some((attr) => tag.textContent.includes(attr))
-    );
-  tags
-    .map((tag) => tag.cloneNode(true))
-    .forEach((tag) => shadowWrapper.appendChild(tag));
-  tags.forEach((tag) => tag.parentNode.removeChild(tag));
-
-  // TODO styled-component 动态演算的样式无法拷贝
-};
-
-export const handleScopedStyle = (
-  shadowWrapper,
-  moduleWrapper,
-  isPrepare = false
-) => {
-  const shadow =
-    shadowWrapper.shadowRoot || shadowWrapper.attachShadow({ mode: "open" });
-  if (isPrepare) {
-    shadow.appendChild(moduleWrapper);
-  } else {
-    moveScopedStyle(shadow, moduleWrapper);
-  }
-  return shadow;
-};
-
 export const loadPrefetch = (url) => {
   const s = document.createElement("link");
   s.rel = "preload";

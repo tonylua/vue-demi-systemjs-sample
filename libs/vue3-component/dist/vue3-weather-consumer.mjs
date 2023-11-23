@@ -1,4 +1,4 @@
-import { defineComponent as c, computed as s, h as o, isVue2 as t } from "vue-demi";
+import { defineComponent as c, computed as s, h as o, isVue2 as r } from "vue-demi";
 const u = `
     border: 1px solid var(--vue3-color, #336699);
     border-radius: 10px;
@@ -14,7 +14,7 @@ const u = `
     temperature: Number
   },
   setup(e, { emit: i }) {
-    const l = s(() => `${e.temperature || "--"}℃`), n = t ? 2 : 3;
+    const l = s(() => `${e.temperature || "--"}℃`), n = r ? 2 : 3;
     window.globalVar1 = "vue3GlobalVar1", console.log(
       "🇵🇸 setup 3",
       n,
@@ -25,7 +25,7 @@ const u = `
       // @ts-ignore
       window.__COMPONENT_HOST_VUE_VERSION__
     );
-    const r = () => {
+    const t = () => {
       console.log("onClick", e.city), i("msg", e.city);
     };
     return () => o(
@@ -33,12 +33,12 @@ const u = `
       {
         class: "consumer",
         style: u,
-        ...t ? {
+        ...r ? {
           on: {
-            click: r
+            click: t
           }
         } : {
-          onClick: r
+          onClick: t
         }
       },
       [
@@ -50,7 +50,13 @@ const u = `
         }),
         `${e.city}: ${l.value}`,
         o("hr"),
-        `i am running in Vue${n}`
+        o(
+          "div",
+          {
+            class: "custom-style"
+          },
+          `i am running in Vue${n}`
+        )
       ]
     );
   }
