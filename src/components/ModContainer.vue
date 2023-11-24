@@ -107,6 +107,7 @@ export default {
             // setTimeout(() => {
             shadow = handleScopedStyle(shadowWrapper, modWrapper, {
               whitelist: this.classnameWhitelist,
+              globalWhitelist: [/\W\.el-/],
               includeAncestorScopedWhitelist: true,
             });
             // }, 0);

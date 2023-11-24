@@ -92,8 +92,19 @@ export default {
 }
 </style>
 
+<style lang="css">
+.el-foo-bar {
+  transform: rotate(-3deg);
+}
+</style>
+
 <style scoped>
 .custom-style {
   color: green;
+}
+.vue2-consumer h1 {
+  font-size: 26px;
+  text-decoration: underline;
+  font-style: italic;
 }
 </style>

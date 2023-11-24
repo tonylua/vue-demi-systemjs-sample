@@ -76,7 +76,7 @@ export default defineComponent({
           h(
             "div",
             {
-              class: "custom-style",
+              class: "el-foo-bar custom-style",
             },
             `i am running in Vue${vueVer}`
           ),

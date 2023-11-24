@@ -33,7 +33,7 @@ export default defineComponent({
       h(
         "div",
         {
-          class: "consumer",
+          class: "consumer vue2-consumer",
           ...(isVue2
             ? {
                 on: {
@@ -56,7 +56,7 @@ export default defineComponent({
           h(
             "div",
             {
-              class: "custom-style",
+              class: "el-foo-bar custom-style",
             },
             `i am running in Vue${vueVer}`
           ),

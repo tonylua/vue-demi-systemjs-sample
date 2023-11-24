@@ -1,7 +1,12 @@
 /**
+ * @typedef {string[] | RegExp[]} WhiteList
+ */
+
+/**
  * @typedef {Object} ScopedStyleOptions
  * @property {boolean} [isPrepare]
- * @property {string[]} [whitelist] - 允许透传的全局样式
+ * @property {WhiteList} [whitelist] - 允许透传的全局样式
+ * @property {WhiteList} [globalWhitelist] - 允许默认全局透传的样式
  * @property {boolean} [includeAncestorScopedWhitelist] - 祖先元素scoped样式中包含的白名单样式是否生效
  */
 
@@ -15,20 +20,52 @@ const findDatasetAttrs = (dom) =>
     .filter((attr) => /^data-/.test(attr.name))
     .map((tag) => tag.name);
 
+// /**
+//  * 遍历元素和子元素得到样式名集合
+//  * @param {HTMLElement} ele
+//  * @returns {string[]}
+//  */
+// const collectElemsClass = (ele) => {
+//   let classnames = [];
+//   for (let child of ele.children) {
+//     classnames = [...classnames, ...collectElemsClass(child)];
+//   }
+//   classnames = [...classnames, ...Array.from(ele.classList)];
+//   return classnames;
+// };
+
 /**
  * style元素是否包含模块本身的scoped样式
- * @param {string[]} datasetList - 模块根元素上的dataset集合
+ * @param {HTMLElement} moduleWrapper
  * @param {HTMLStyleElement} styleTag - head中的`<style />`元素
  * @returns {boolean}
  */
-const isSelfScopedStyle = (datasetList, styleTag) =>
-  datasetList.length &&
-  datasetList.some((attr) => styleTag.textContent.includes(attr));
+const isSelfScopedStyle = (moduleWrapper, styleTag) => {
+  const wrapperAttrs = findDatasetAttrs(moduleWrapper);
+  const moduleArrts = findDatasetAttrs(moduleWrapper.firstElementChild).filter(
+    (attr) => !wrapperAttrs.includes(attr)
+  );
+  return (
+    moduleArrts.length &&
+    moduleArrts.some((attr) => styleTag.textContent.includes(attr))
+  );
+};
+
+// /**
+//  * style元素是否包含模块本身相关的全局元素，如 `el-` 等
+//  * @param {HTMLElement} moduleWrapper
+//  * @param {HTMLStyleElement} styleTag - head中的`<style />`元素
+//  * @returns {boolean}
+//  */
+// const isSelfGlobalStyle = (moduleWrapper, styleTag) =>
+//   collectElemsClass(moduleWrapper)?.some((cls) =>
+//     styleTag.textContent.includes(cls)
+//   );
 
 /**
  * 将祖先元素scoped样式中包含的白名单样式转换为shadowDOM下可用
  * @param {HTMLElement} moduleWrapper
- * @param {string[]} whitelist
+ * @property {WhiteList} [whitelist] - 允许透传的全局样式
  * @param {HTMLStyleElement} styleTag
  * @returns {HTMLStyleElement}
  */
@@ -38,7 +75,7 @@ const transAncestorWhitelistScoped = (moduleWrapper, whitelist, styleTag) => {
   let dom = moduleWrapper;
   let matched = {};
   while ((dom = dom.parentNode)) {
-    if (dom instanceof HTMLDocument) break;
+    if (dom instanceof Document) break;
     if (dom instanceof ShadowRoot) {
       dom = dom.host;
       if (!dom) continue;
@@ -46,12 +83,18 @@ const transAncestorWhitelistScoped = (moduleWrapper, whitelist, styleTag) => {
     const datasets = findDatasetAttrs(dom);
     if (
       datasets?.some((ds) => {
-        return whitelist?.some((cls) => {
-          const clsWithHash = `\\.${cls}\\[${ds}\\]`;
-          const re = new RegExp(clsWithHash);
-          const match = re.test(cont);
-          if (match)
-            matched[clsWithHash.replace(/\\+/g, "")] = { re, to: `.${cls}` };
+        return whitelist?.some((whiteItem) => {
+          const matchWL =
+            whiteItem instanceof RegExp
+              ? new RegExp(whiteItem).test(cont)
+              : cont.includes(`.${whiteItem}`);
+          const match = matchWL && cont.includes(`[${ds}]`);
+          if (match) matched[ds] = { ds, whiteItem };
+          // const clsWithHash = `\\.${cls}\\[${ds}\\]`;
+          // const re = new RegExp(clsWithHash);
+          // const match = re.test(cont);
+          // if (match)
+          //   matched[clsWithHash.replace(/\\+/g, "")] = { re, to: `.${cls}` };
           return match;
         });
       })
@@ -60,9 +103,13 @@ const transAncestorWhitelistScoped = (moduleWrapper, whitelist, styleTag) => {
     }
   }
   if (Object.keys(matched).length) {
-    Object.values(matched).forEach(({ re, to }) => {
-      cont = cont.replace(new RegExp(re, "g"), to);
+    Object.values(matched).forEach(({ ds, cls }) => {
+      cont = cont.replace(new RegExp(`\\[${ds}\\]`, "g"), "");
+      cont = cont.replace(new RegExp(`\\.${cls}`, "g"), ":host");
     });
+    // Object.values(matched).forEach(({ re, to }) => {
+    //   cont = cont.replace(new RegExp(re, "g"), to);
+    // });
     clone.textContent = cont;
   }
   return clone;
@@ -70,13 +117,16 @@ const transAncestorWhitelistScoped = (moduleWrapper, whitelist, styleTag) => {
 
 /**
  * style元素是否包含白名单允许透传的样式
- * @param {string[]} whitelist - 允许透传的全局样式
+ * @property {WhiteList} [whitelist] - 允许透传的全局样式
  * @param {HTMLStyleElement} styleTag - head中的`<style />`元素
  * @returns {boolean}
  */
 const isWhitelistStyle = (whitelist, styleTag) =>
-  whitelist?.length &&
-  whitelist.some((cls) => styleTag.textContent.includes(cls));
+  whitelist?.some((whiteItem) =>
+    whiteItem instanceof RegExp
+      ? new RegExp(whiteItem).test(styleTag.textContent)
+      : styleTag.textContent.includes(`.${whiteItem}`)
+  );
 
 /**
  * 将head中的样式搬运到shadowDOM下
@@ -89,14 +139,12 @@ const moveScopedStyle = (hostElement, moduleWrapper, options) => {
   options = {
     isPrepare: false,
     whitelist: [],
+    globalWhitelist: [],
     includeAncestorScopedWhitelist: false,
     ...options,
   };
 
-  const wrapperAttrs = findDatasetAttrs(moduleWrapper);
-  const moduleArrts = findDatasetAttrs(moduleWrapper.firstElementChild).filter(
-    (attr) => !wrapperAttrs.includes(attr)
-  );
+  const wl = [...options.globalWhitelist, ...options.whitelist];
 
   const allStyles = Array.prototype.filter.call(document.head.children, (tag) =>
     /^style$/i.test(tag.tagName)
@@ -106,7 +154,7 @@ const moveScopedStyle = (hostElement, moduleWrapper, options) => {
     restStyles.filter((sty) => !excludes.includes(sty));
 
   const selfScopedStyles = restStyles.filter((tag) =>
-    isSelfScopedStyle(moduleArrts, tag)
+    isSelfScopedStyle(moduleWrapper, tag)
   );
   restStyles = getRest(selfScopedStyles);
   selfScopedStyles
@@ -114,22 +162,24 @@ const moveScopedStyle = (hostElement, moduleWrapper, options) => {
     .forEach((tag) => hostElement.appendChild(tag));
   // selfScopedStyles.forEach((tag) => tag.parentNode.removeChild(tag));
 
-  const whiteStyles = restStyles.filter((tag) =>
-    isWhitelistStyle(options.whitelist, tag)
-  );
+  const whiteStyles = restStyles.filter((tag) => isWhitelistStyle(wl, tag));
   restStyles = getRest(whiteStyles);
   whiteStyles
     .map((tag) =>
       options.includeAncestorScopedWhitelist
-        ? transAncestorWhitelistScoped(moduleWrapper, options.whitelist, tag)
+        ? transAncestorWhitelistScoped(moduleWrapper, wl, tag)
         : tag.cloneNode(true)
     )
     .forEach((tag) => hostElement.appendChild(tag));
   // whiteStyles.forEach((tag) => tag.parentNode.removeChild(tag));
 
-  // TODO 全局el-样式
-  console.log("rest", restStyles);
-  // TODO styled-component 动态演算的样式无法拷贝
+  // const selfGlobalStyles = restStyles.filter((tag) =>
+  //   isSelfGlobalStyle(moduleWrapper, tag)
+  // );
+  // restStyles = getRest(selfGlobalStyles);
+  // selfGlobalStyles
+  //   .map((tag) => tag.cloneNode(true))
+  //   .forEach((tag) => hostElement.appendChild(tag));
 };
 
 /**
