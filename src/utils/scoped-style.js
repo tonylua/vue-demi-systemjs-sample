@@ -180,6 +180,15 @@ const moveScopedStyle = (hostElement, moduleWrapper, options) => {
   // selfGlobalStyles
   //   .map((tag) => tag.cloneNode(true))
   //   .forEach((tag) => hostElement.appendChild(tag));
+  Array.prototype.filter
+    .call(
+      document.head.children,
+      (tag) =>
+        /^link$/i.test(tag.tagName) &&
+        (tag.type === "text/css" || tag.rel === "stylesheet")
+    )
+    .map((tag) => tag.cloneNode(true))
+    .forEach((tag) => hostElement.appendChild(tag));
 };
 
 /**
