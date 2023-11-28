@@ -128,6 +128,12 @@ const isWhitelistStyle = (whitelist, styleTag) =>
       : styleTag.textContent.includes(`.${whiteItem}`)
   );
 
+const isStyleElement = (tag) => /^style$/i.test(tag.tagName);
+
+const isLinkElement = (tag) =>
+  /^link$/i.test(tag.tagName) &&
+  (tag.type === "text/css" || tag.rel === "stylesheet");
+
 /**
  * 将head中的样式搬运到shadowDOM下
  * @param {HTMLElement} hostElement - shadowDOM 实际挂载的元素
@@ -146,49 +152,23 @@ const moveScopedStyle = (hostElement, moduleWrapper, options) => {
 
   const wl = [...options.globalWhitelist, ...options.whitelist];
 
-  const allStyles = Array.prototype.filter.call(document.head.children, (tag) =>
-    /^style$/i.test(tag.tagName)
-  );
-  let restStyles = allStyles;
-  const getRest = (excludes = []) =>
-    restStyles.filter((sty) => !excludes.includes(sty));
+  const _append = (tag, clone = true) => {
+    const clonedTag = clone ? tag.cloneNode(true) : tag;
+    hostElement.appendChild(clonedTag);
+  };
 
-  const selfScopedStyles = restStyles.filter((tag) =>
-    isSelfScopedStyle(moduleWrapper, tag)
-  );
-  restStyles = getRest(selfScopedStyles);
-  selfScopedStyles
-    .map((tag) => tag.cloneNode(true))
-    .forEach((tag) => hostElement.appendChild(tag));
-  // selfScopedStyles.forEach((tag) => tag.parentNode.removeChild(tag));
-
-  const whiteStyles = restStyles.filter((tag) => isWhitelistStyle(wl, tag));
-  restStyles = getRest(whiteStyles);
-  whiteStyles
-    .map((tag) =>
-      options.includeAncestorScopedWhitelist
-        ? transAncestorWhitelistScoped(moduleWrapper, wl, tag)
-        : tag.cloneNode(true)
-    )
-    .forEach((tag) => hostElement.appendChild(tag));
-  // whiteStyles.forEach((tag) => tag.parentNode.removeChild(tag));
-
-  // const selfGlobalStyles = restStyles.filter((tag) =>
-  //   isSelfGlobalStyle(moduleWrapper, tag)
-  // );
-  // restStyles = getRest(selfGlobalStyles);
-  // selfGlobalStyles
-  //   .map((tag) => tag.cloneNode(true))
-  //   .forEach((tag) => hostElement.appendChild(tag));
-  Array.prototype.filter
-    .call(
-      document.head.children,
-      (tag) =>
-        /^link$/i.test(tag.tagName) &&
-        (tag.type === "text/css" || tag.rel === "stylesheet")
-    )
-    .map((tag) => tag.cloneNode(true))
-    .forEach((tag) => hostElement.appendChild(tag));
+  Array.from(document.head.children)
+    .filter((tag) => isStyleElement(tag) || isLinkElement(tag))
+    .forEach((tag) => {
+      if (isLinkElement(tag) || isSelfScopedStyle(moduleWrapper, tag)) {
+        _append(tag);
+      } else if (isWhitelistStyle(wl, tag)) {
+        const clone = options.includeAncestorScopedWhitelist
+          ? transAncestorWhitelistScoped(moduleWrapper, wl, tag)
+          : tag.cloneNode(true);
+        _append(clone, false);
+      }
+    });
 };
 
 /**
