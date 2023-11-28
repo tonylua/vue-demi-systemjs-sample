@@ -39,11 +39,12 @@ export function wrapModuleWithSandbox(sandboxId, modCont, context) {
                 rawWindow._sandboxes.push(_local_global_win);
               }
               return (function (window) {
+                with (window) {
           `;
           let source = modCont.slice(start, end);
           source = source.replace(/{/, varsCode);
 
-          source = source.replace(/}$/, "})(_local_global_win)}");
+          source = source.replace(/}$/, "}})(_local_global_win)}");
           path.replaceWithSourceString(source);
         }
       }
