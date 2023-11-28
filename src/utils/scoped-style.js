@@ -150,23 +150,27 @@ const moveScopedStyle = (hostElement, moduleWrapper, options) => {
     ...options,
   };
 
-  const wl = [...options.globalWhitelist, ...options.whitelist];
-
   const _append = (tag, clone = true) => {
     const clonedTag = clone ? tag.cloneNode(true) : tag;
     hostElement.appendChild(clonedTag);
   };
+
+  const _appendWL = (tag, whitelist) =>
+    _append(
+      options.includeAncestorScopedWhitelist
+        ? transAncestorWhitelistScoped(moduleWrapper, whitelist, tag)
+        : tag.cloneNode(true)
+    );
 
   Array.from(document.head.children)
     .filter((tag) => isStyleElement(tag) || isLinkElement(tag))
     .forEach((tag) => {
       if (isLinkElement(tag) || isSelfScopedStyle(moduleWrapper, tag)) {
         _append(tag);
-      } else if (isWhitelistStyle(wl, tag)) {
-        const clone = options.includeAncestorScopedWhitelist
-          ? transAncestorWhitelistScoped(moduleWrapper, wl, tag)
-          : tag.cloneNode(true);
-        _append(clone, false);
+      } else if (isWhitelistStyle(options.whitelist, tag)) {
+        _appendWL(tag, options.whitelist);
+      } else if (isWhitelistStyle(options.globalWhitelist, tag)) {
+        _appendWL(tag, options.globalWhitelist);
       }
     });
 };
