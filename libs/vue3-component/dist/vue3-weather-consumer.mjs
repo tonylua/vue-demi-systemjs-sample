@@ -1,11 +1,20 @@
-import { defineComponent as c, computed as s, h as e, isVue2 as r } from "vue-demi";
-const u = `
+import { isVue2 as l, h as c, defineComponent as a, computed as d } from "vue-demi";
+const m = (o) => o ? Object.entries(o).reduce((r, [e, t]) => (e = e.charAt(0).toUpperCase() + e.slice(1), e = `on${e}`, { ...r, [e]: t }), {}) : null, n = (o, r = {}, e) => {
+  if (l)
+    return c(o, r, e);
+  const { props: t, domProps: s, on: i, ...u } = r;
+  return c(
+    o,
+    { ...u, ...t, ...s, ...m(i) },
+    e
+  );
+}, p = `
     border: 1px solid var(--vue3-color, #336699);
     border-radius: 10px;
     width: 300px;
     box-sizing: border-box;
     padding: 20px;
-`, a = c({
+`, g = a({
   props: {
     city: {
       type: String,
@@ -13,11 +22,11 @@ const u = `
     },
     temperature: Number
   },
-  setup(o, { emit: i }) {
-    const l = s(() => `${o.temperature || "--"}℃`), n = r ? 2 : 3;
+  setup(o, { emit: r }) {
+    const e = d(() => `${o.temperature || "--"}℃`), t = l ? 2 : 3;
     window.globalVar1 = "vue3GlobalVar1", console.log(
       "🇵🇸 setup 3",
-      n,
+      t,
       // @ts-ignore
       window.globalVar1,
       // @ts-ignore
@@ -25,37 +34,33 @@ const u = `
       // @ts-ignore
       window.__COMPONENT_HOST_VUE_VERSION__
     );
-    const t = () => {
-      console.log("onClick", o.city), i("msg", o.city);
+    const s = () => {
+      console.log("onClick", o.city), r("msg", o.city);
     };
-    return () => e(
+    return () => n(
       "div",
       {
         class: "consumer",
-        style: u,
-        ...r ? {
-          on: {
-            click: t
-          }
-        } : {
-          onClick: t
+        style: p,
+        on: {
+          click: s
         }
       },
       [
-        e("h1", {
+        n("h1", {
           style: "color: #336699",
           domProps: {
             innerHTML: "&lt;vue3-weather-consumer/&gt;"
           }
         }),
-        `${o.city}: ${l.value}`,
-        e("hr"),
-        e(
+        `${o.city}: ${e.value}`,
+        n("hr"),
+        n(
           "div",
           {
             class: "el-foo-bar custom-style"
           },
-          `i am running in Vue${n}`
+          `i am running in Vue${t}`
         )
       ]
     );
@@ -63,7 +68,7 @@ const u = `
 });
 console.log(
   "v3c",
-  a
+  g
   // Vue.version,
   // Vue === window.Vue,
   // Vue === window.Vue3,
@@ -73,5 +78,5 @@ console.log(
   // VueDemi === window.VueDemi
 );
 export {
-  a as default
+  g as default
 };

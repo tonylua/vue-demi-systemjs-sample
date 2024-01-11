@@ -1,3 +1,5 @@
+const path = require("path");
+
 module.exports = {
   productionSourceMap: false,
   configureWebpack: {
@@ -12,6 +14,11 @@ module.exports = {
     optimization: {
       // splitChunks: false,
       minimize: false,
+    },
+    resolve: {
+      alias: {
+        "h-demi": path.resolve(__dirname, "../../src/utils/h-demi"),
+      },
     },
   },
   // filenameHashing: false,

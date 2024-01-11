@@ -1,5 +1,6 @@
 // vue 3 component
-import { defineComponent, h, computed, isVue2 } from "vue-demi";
+import { defineComponent, computed, isVue2 } from "vue-demi";
+import h from "h-demi";
 
 const Sty = `
     border: 1px solid var(--vue3-color, #336699);
@@ -54,15 +55,9 @@ export default defineComponent({
         {
           class: "consumer",
           style: Sty,
-          ...(isVue2
-            ? {
-                on: {
-                  click: onClick,
-                },
-              }
-            : {
-                onClick,
-              }),
+          on: {
+            click: onClick,
+          },
         },
         [
           h("h1", {

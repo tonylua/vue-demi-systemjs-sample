@@ -1,4 +1,5 @@
 import vue from "@vitejs/plugin-vue";
+import path from "path";
 import { defineConfig } from "vite";
 
 export default defineConfig({
@@ -28,5 +29,10 @@ export default defineConfig({
   },
   define: {
     "process.env": process.env,
+  },
+  resolve: {
+    alias: {
+      "h-demi": path.resolve(__dirname, "../../src/utils/h-demi"),
+    },
   },
 });

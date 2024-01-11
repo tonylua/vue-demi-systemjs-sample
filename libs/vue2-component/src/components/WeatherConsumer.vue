@@ -1,6 +1,7 @@
 <script>
 // vue 2 component
-import { defineComponent, h, computed, isVue2 } from "vue-demi";
+import { defineComponent, computed, isVue2 } from "vue-demi";
+import h from "h-demi";
 
 export default defineComponent({
   props: {
@@ -34,15 +35,9 @@ export default defineComponent({
         "div",
         {
           class: "consumer vue2-consumer",
-          ...(isVue2
-            ? {
-                on: {
-                  click: onClick,
-                },
-              }
-            : {
-                onClick: onClick,
-              }),
+          on: {
+            click: onClick,
+          },
         },
         [
           h("h1", {
